@@ -31,6 +31,7 @@ use canonical::{Canon, InvalidEncoding, Sink, Source, Store};
 /// logic of the operations that the `Verifier` will need to do in order to
 /// formally verify the `Proof`.
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
+#[cfg_attr(feature = "canon", derive(Canon))]
 pub struct Proof {
     /// Commitment to the witness polynomial for the left wires.
     pub(crate) a_comm: Commitment,
@@ -59,27 +60,6 @@ pub struct Proof {
     pub(crate) w_zw_comm: Commitment,
     /// Subset of all of the evaluations added to the proof.
     pub(crate) evaluations: ProofEvaluations,
-}
-
-#[cfg(feature = "canon")]
-impl<S: Store> Canon<S> for Proof {
-    fn write(&self, sink: &mut impl Sink<S>) -> Result<(), S::Error> {
-        sink.copy_bytes(&self.to_bytes());
-        Ok(())
-    }
-
-    fn read(source: &mut impl Source<S>) -> Result<Self, S::Error> {
-        let mut bytes = [0u8; PROOF_SIZE];
-        bytes.copy_from_slice(source.read_bytes(PROOF_SIZE));
-        match Proof::from_bytes(&bytes) {
-            Ok(proof) => Ok(proof),
-            _ => Err(InvalidEncoding.into()),
-        }
-    }
-
-    fn encoded_len(&self) -> usize {
-        PROOF_SIZE
-    }
 }
 
 impl Serializable<{ 11 * Commitment::SIZE + ProofEvaluations::SIZE }>
