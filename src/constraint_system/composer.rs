@@ -490,7 +490,7 @@ impl StandardComposer {
                     + (qr * b)
                     + (qo * c)
                     + (q4 * d)
-                    + pi
+                    + pi[i]
                     + qc)
                 + qlogic
                     * (((delta(a_next - four * a) - delta(b_next - four * b))
